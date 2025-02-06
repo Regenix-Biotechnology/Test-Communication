@@ -34,15 +34,11 @@ SERIAL_PORT = 'COM3'
 BAUD_RATE = 115200  
 DATA_TIMEOUT = 2
 
-
 CSV_FILE = "firesting_data_log.csv"  # Fichier de stockage des données
-DURATION_SECONDS = 30
+DURATION_SECONDS = 604800
 #DURATION_SECONDS = 7 * 24 * 60 * 60  # Durée de l'acquisition: 7 jours
 SAMPLING_INTERVAL = 1.0                # Fréquence d'échantillonnage en secondes
-
 print("Chemin du fichier CSV :", os.path.abspath(CSV_FILE))
-
-
 
 # Initialisation du port série
 try:
@@ -54,9 +50,9 @@ except serial.SerialException as e:
 
 # Fonction pour envoyer une commande au module FireSting
 def send_command(command):
-    ser.write((f"{command}\r\n").encode()) #Envoie la commande série au module FireSting, La commande est complétée par \r\n (retour à la ligne + saut de ligne),convertit la chaîne en format binaire UTF-8
+    ser.write((f"{command}\r\n").encode())                                                          #Envoie la commande série au module FireSting, La commande est complétée par \r\n (retour à la ligne + saut de ligne),convertit la chaîne en format binaire UTF-8
     time.sleep(0.1)
-    response = ser.readline().decode().strip() #transforme les données binaires en chaîne de texte,supprime les espaces et les retours à la ligne 
+    response = ser.readline().decode().strip()                                                       #transforme les données binaires en chaîne de texte,supprime les espaces et les retours à la ligne 
     return response
 
 # Fonction pour lire les mesures de température, DO et pH
@@ -77,13 +73,14 @@ def read_measurements():
 
         # Extraction des valeurs clés selon les indices documentés
         temp_sample = float(parts[8]) / 1000.0 
-        DO = float(parts[4]) / 1000.0 
-        ph_value = float(parts[15]) / 100.0
+        DO = float(parts[9]) / 100.0 #9 = 253.2(/100)
+        ph_value = float(parts[17])/1000.0
+        O2_concentration = float(parts[14]) / 1000.0
 
         print(response)
 
 
-        return temp_sample, DO, ph_value
+        return temp_sample, DO, ph_value, O2_concentration
     except (ValueError, IndexError) as e:   #Si une conversion en entier échoue,Si un indice (parts[5]) dépasse la taille de la liste 
         print(f"Erreur lors du parsing des données : {e}")
         return None
@@ -91,17 +88,18 @@ def read_measurements():
 # Création ou ouverture du fichier CSV
 with open(CSV_FILE, mode='w', newline='') as file:
     csv_writer = csv.writer(file)
-    csv_writer.writerow(["Horodatage", "Température (°C)", "DO (µmol/L)", "pH"])
+    csv_writer.writerow(["Horodatage", "Température (°C)", "DO (µmol/L)", "pH", "O2 concentration(%)"])
 
     start_time = time.time()
+    end_time = start_time + DURATION_SECONDS
 
-    while time.time() - start_time < DURATION_SECONDS:
+    while time.time() < end_time:
         measurements = read_measurements()      #Si la mesure est valide, les valeurs sont extraites et enregistrés
         if measurements:
-            temp, do, ph = measurements
+            temp, do, ph, O2 = measurements
             timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S') #YYYY-MM-DD HH:MM:SS
-            csv_writer.writerow([timestamp, temp, do, ph])
-            print(f"{timestamp} | Temp: {temp} °C | DO: {do} µmol/L | pH: {ph}")
+            csv_writer.writerow([timestamp, temp, do, ph, O2])
+            print(f"{timestamp} | Temp: {temp} °C | DO: {do} µmol/L | pH: {ph} | O2: {O2} %")
 
         time.sleep(SAMPLING_INTERVAL)
 

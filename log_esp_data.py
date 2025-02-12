@@ -32,7 +32,7 @@ print("Finish")
 """
 
 # Configuration de la communication série
-SERIAL_PORT = 'COM3'  
+SERIAL_PORT = 'COM4'  
 BAUD_RATE = 115200  
 DATA_TIMEOUT = 2
 
@@ -84,7 +84,7 @@ def read_measurements():
         # ph_value = float(parts[17])/1000.0
         # O2_concentration = float(parts[14]) / 1000.0
 
-        match = re.search(r'Timestamp: (\d+), Temperature: ([\d.]+), DO: ([\d.]+), O2Percent: ([\d.]+), Ph: ([\d.]+)', line)
+        match = re.search(r'Timestamp: (\d+), Temperature: ([\d.]+), DO: ([\d.]+), O2Percent: ([\d.]+), Ph: ([\d.]+)', response)
         if match:
             # timestamp = int(match.group(1))
             temperature = float(match.group(2))

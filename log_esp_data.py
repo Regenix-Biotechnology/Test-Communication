@@ -98,9 +98,9 @@ def read_measurements():
     except (ValueError, IndexError) as e:   #Si une conversion en entier échoue,Si un indice (parts[5]) dépasse la taille de la liste 
         print(f"Erreur lors du parsing des données : {e}")
         return None
-    except KeyboardInterrupt:
-        print("Program terminated by user.")
-        sys.exit(0)
+    # except KeyboardInterrupt:
+    #     print("Program terminated by user.")
+    #     sys.exit(0)
 
 # Création ou ouverture du fichier CSV
 with open(CSV_FILE, mode='w', newline='') as file:

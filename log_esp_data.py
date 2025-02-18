@@ -84,6 +84,12 @@ def read_measurements():
         # ph_value = float(parts[17])/1000.0
         # O2_concentration = float(parts[14]) / 1000.0
 
+        temperature = None
+        DO = None
+        ph_value = None
+        O2_concentration = None
+
+
         match = re.search(r'Timestamp: (\d+), Temperature: ([\d.]+), DO: ([\d.]+), O2Percent: ([\d.]+), Ph: ([\d.]+)', response)
         if match:
             # timestamp = int(match.group(1))
